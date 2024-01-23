@@ -22,6 +22,7 @@
   font-size: 1em;
   cursor: pointer;
 }
+
 .upload-page h1 {
   margin: 50px;
   font-size: 2em;
@@ -32,4 +33,28 @@ button {
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
+}
+
+
+
+.upload-page-buttons {
+  display: flex;
+  justify-content: space-around; /* 버튼들 사이에 공간을 균등하게 분배 */
+  width: 100%; /* 버튼 컨테이너의 너비를 전체로 설정 */
+  margin-top: 20px; /* 버튼 컨테이너 상단 여백 */
+}
+
+.upload-page-button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #127de0;
+  color: white;
+}
+
+.upload-page-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
