@@ -1,5 +1,8 @@
+
 import React, { useState } from 'react';
 import './App.css';
+import axios from 'axios';
+
 
 // Button 컴포넌트 스타일
 const styles = {
@@ -84,7 +87,31 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
       setFile(selectedFile); // 파일 상태 업데이트
     }
   };
+  const handleFileUpload = async () => {
+    // 파일이 선택되지 않았으면 아무것도 하지 않음
+    if (!file) return;
 
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // FastAPI 엔드포인트에 파일 업로드 요청을 보냅니다.
+      const response = await axios.post('http://localhost:8000/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      // 서버 응답에 따라 적절한 페이지로 이동
+      if (response.status === 200) {
+        // 서버로부터의 응답을 확인하고 다음 단계로 진행
+        onTransformClick();
+      }
+    } catch (error) {
+      console.error("There was an error uploading the file:", error);
+      // 에러 처리 로직을 추가할 수 있습니다.
+    }
+  };
   return (
     <div className="upload-page">
       <h1>업로드 페이지</h1>
