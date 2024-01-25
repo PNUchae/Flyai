@@ -38,43 +38,71 @@ const Button = ({ label, onClick }) => {
     </button>
   );
 };
-
 // 첫 번째 페이지 컴포넌트
 function HomePage({ onStartClick }) {
-  const styles = {
-    ImageContainer: {
-      top: '194px',
-      left: '128px',
-      width: '512px',
-      height: '512px',
-      borderRadius: '24px',
-      backgroundImage: 'url(./image.png)',
-      backgroundPosition: 'center center',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-    },
+  const containerStyle = {
+    display: 'flex', // Flex 컨테이너 설정
+    alignItems: 'center', // 아이템을 수직 방향에서 가운데 정렬
+    justifyContent: 'center', // 아이템을 수평 방향에서 가운데 정렬
+    height: '100vh', // 전체 뷰포트 높이를 사용
+    padding: '20px', // 컨테이너 내부 여백
   };
-  
-  const defaultProps = {
-    image: 'https://assets.api.uizard.io/api/cdn/stream/849a15be-4b66-4c69-af5c-9fd20903a8b3.png',
-  }
-  
-  const Image = (props) => {
-    return (
-      <div style={{
-        ...styles.ImageContainer,
-        backgroundImage: `url(${props.image ?? defaultProps.image})`,
-      }} />
-    );
+
+  const imageContainerStyle = {
+    flex: 1, // 이미지 컨테이너에 유연한 공간 배분
+    display: 'flex', // 이미지 컨테이너 내에서도 flex 사용
+    justifyContent: 'center', // 이미지를 수평 방향에서 가운데 정렬
+    alignItems: 'center', // 이미지를 수직 방향에서 가운데 정렬
+  };
+
+  const imageStyle = {
+    maxWidth: '100%', // 이미지의 최대 너비를 컨테이너의 100%로 설정
+    maxHeight: '80vh', // 이미지의 최대 높이를 뷰포트 높이의 80%로 설정
+    borderRadius: '24px', // 이미지 모서리 둥글게
+  };
+
+  const textContainerStyle = {
+    flex: 1, // 텍스트 컨테이너에 유연한 공간 배분
+    display: 'flex',
+    flexDirection: 'column', // 요소들을 수직으로 쌓기
+    alignItems: 'center', // 수직 방향 중앙 정렬
+    justifyContent: 'center', // 수평 방향 중앙 정렬
+  };
+
+  const textStyle = {
+    color: '#127de0', // 예제로 설정한 색상, 필요에 따라 변경 가능
+    fontSize: '2rem', // 큰 폰트 사이즈
+    fontWeight: 'bold', // 글자 굵게
+  };
+
+  const buttonStyle = {
+    cursor: 'pointer',
+    padding: '10px 15px',
+    border: '0',
+    borderRadius: '24px',
+    backgroundColor: '#127de0',
+    color: '#ffffff',
+    fontSize: '1.5rem',
+    fontFamily: 'Montserrat',
+    fontWeight: '500',
+    lineHeight: '1.5',
+    outline: 'none',
+    marginTop: '20px', // 버튼 위쪽 여백 설정
   };
 
   return (
-    <div className="home-page">
-      <h1>오디오가 오디오</h1>
-      <button onClick={onStartClick}>시작하기</button>
+    <div style={containerStyle}>
+      <div style={imageContainerStyle}>
+        <img src="/startpage.png" alt="Start Page" style={imageStyle} />
+      </div>
+      <div style={textContainerStyle}>
+        <h1 style={textStyle}>오디오가 오디오</h1>
+        <button onClick={onStartClick} style={buttonStyle}>시작하기</button>
+      </div>
     </div>
   );
 }
+
 
 // 두 번째 페이지 컴포넌트
 function UploadPage({ onGoBackClick, onTransformClick }) {
@@ -101,7 +129,6 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
           'Content-Type': 'multipart/form-data'
         }
       });
-
       // 서버 응답에 따라 적절한 페이지로 이동
       if (response.status === 200) {
         // 서버로부터의 응답을 확인하고 다음 단계로 진행
@@ -112,6 +139,7 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
       // 에러 처리 로직을 추가할 수 있습니다.
     }
   };
+
   return (
     <div className="upload-page">
       <h1>업로드 페이지</h1>
