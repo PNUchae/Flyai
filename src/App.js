@@ -118,15 +118,16 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
   const handleFileUpload = async () => {
     // 파일이 선택되지 않았으면 아무것도 하지 않음
     if (!file) return;
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
       // FastAPI 엔드포인트에 파일 업로드 요청을 보냅니다.
-      const response = await axios.post('http://localhost:8000/upload', formData, {
+      const response = await axios.post('http://localhost:8000/uploadfile', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${userToken}`, // 사용자 토큰을 포함
         }
       });
       // 서버 응답에 따라 적절한 페이지로 이동
@@ -139,6 +140,7 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
       // 에러 처리 로직을 추가할 수 있습니다.
     }
   };
+  
 
   return (
     <div className="upload-page">
