@@ -48,6 +48,35 @@ function HomePage({ onStartClick }) {
     padding: '20px', // 컨테이너 내부 여백
   };
 
+  const [userId, setUserId] = useState(''); // 사용자 ID 상태
+  const [password, setPassword] = useState(''); // 사용자 PW 상태
+
+  const handleLoginClick = async () => {
+    try {
+      // 로그인 요청
+      const response = await axios.post('http://localhost:8000/users/login', {
+        username: userId,
+        password: password,
+      });
+  
+      if (response.data.success) {
+        console.log("Login successful", response.data);
+        
+        // 토큰을 localStorage에 저장
+        const token = response.data.token;
+        localStorage.setItem('userToken', token);
+  
+        // 로그인 성공 처리, 예: 사용자 페이지로 리디렉션
+      } else {
+        console.log("Login failed", response.data.message);
+        // 로그인 실패 처리
+      }
+    } catch (error) {
+      console.error("Login error", error);
+    }
+  };
+  
+
   const imageContainerStyle = {
     flex: 1, // 이미지 컨테이너에 유연한 공간 배분
     display: 'flex', // 이미지 컨테이너 내에서도 flex 사용
@@ -89,20 +118,54 @@ function HomePage({ onStartClick }) {
     outline: 'none',
     marginTop: '20px', // 버튼 위쪽 여백 설정
   };
+  const loginContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column', // 요소들을 수직으로 쌓기
+    alignItems: 'center', // 수직 방향 중앙 정렬
+    justifyContent: 'center', // 수평 방향 중앙 정렬
+    margin: '10px', // 여백 설정
+  };
+
+  const inputStyle = {
+    margin: '10px',
+    padding: '10px',
+    fontSize: '1rem',
+    borderRadius: '5px',
+    border: '1px solid #ddd',
+    width: '80%', // 입력 필드 너비
+  };
+
 
   return (
     <div style={containerStyle}>
-      <div style={imageContainerStyle}>
-        <img src="/startpage.png" alt="Start Page" style={imageStyle} />
-      </div>
       <div style={textContainerStyle}>
         <h1 style={textStyle}>오디오가 오디오</h1>
-        <button onClick={onStartClick} style={buttonStyle}>시작하기</button>
+        <div style={imageContainerStyle}>
+        {/* public 폴더에서 이미지를 불러옵니다 */}
+        <img src="/startpage.png" alt="Start Page" style={imageStyle} />
+        <div style={loginContainerStyle}>
+          <input
+            type="text"
+            placeholder="ID"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            style={inputStyle}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={inputStyle}
+          />
+        </div>
+        <Button label="로그인" onClick={onStartClick} />
+      </div>
+      
       </div>
     </div>
   );
 }
-
 
 // 두 번째 페이지 컴포넌트
 function UploadPage({ onGoBackClick, onTransformClick }) {
@@ -115,32 +178,34 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
       setFile(selectedFile); // 파일 상태 업데이트
     }
   };
+
   const handleFileUpload = async () => {
-    // 파일이 선택되지 않았으면 아무것도 하지 않음
     if (!file) return;
+  
+    // localStorage에서 토큰 가져오기
+    const userToken = localStorage.getItem('userToken');
   
     const formData = new FormData();
     formData.append('file', file);
   
     try {
-      // FastAPI 엔드포인트에 파일 업로드 요청을 보냅니다.
+      // 파일 업로드 요청 (토큰 포함)
       const response = await axios.post('http://localhost:8000/uploadfile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${userToken}`, // 사용자 토큰을 포함
+          'Authorization': `Bearer ${userToken}`, // 헤더에 토큰 포함
         }
       });
-      // 서버 응답에 따라 적절한 페이지로 이동
+  
       if (response.status === 200) {
-        // 서버로부터의 응답을 확인하고 다음 단계로 진행
-        onTransformClick();
+        console.log("File uploaded successfully");
+        // 파일 업로드 성공 처리
       }
     } catch (error) {
       console.error("There was an error uploading the file:", error);
-      // 에러 처리 로직을 추가할 수 있습니다.
+      // 에러 처리
     }
   };
-  
 
   return (
     <div className="upload-page">
@@ -153,7 +218,7 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
       />
       <div className="upload-page-buttons"> {/* 버튼 컨테이너 */}
         <Button label= "돌아가기" onClick={onGoBackClick} className="upload-page-button" />
-        <Button label= "변환하기" onClick={onTransformClick} disabled={!file} className="upload-page-button" />
+        <Button label= "변환하기" onClick={handleFileUpload} disabled={!file} className="upload-page-button" /> {/* handleFileUpload 함수 호출 */}
       </div>
     </div>
   );
