@@ -39,7 +39,7 @@ const Button = ({ label, onClick }) => {
   );
 };
 // 첫 번째 페이지 컴포넌트
-function HomePage({ onStartClick }) {
+function HomePage({ onLoginSuccess }) {
   const containerStyle = {
     display: 'flex', // Flex 컨테이너 설정
     alignItems: 'center', // 아이템을 수직 방향에서 가운데 정렬
@@ -50,33 +50,32 @@ function HomePage({ onStartClick }) {
 
   const [userId, setUserId] = useState(''); // 사용자 ID 상태
   const [password, setPassword] = useState(''); // 사용자 PW 상태
+  const [currentPage, setCurrentPage] = useState('home');
 
   const handleLoginClick = async () => {
     try {
-      // 로그인 요청
       const response = await axios.post('http://localhost:8000/users/login', {
-        username: userId,
-        password: password,
+        login_id: userId,
+        login_pw: password,
       });
-  
-      if (response.data.success) {
+
+      if (response.data.access_token) {
         console.log("Login successful", response.data);
-        
-        // 토큰을 localStorage에 저장
-        const token = response.data.token;
-        localStorage.setItem('userToken', token);
-  
-        // 로그인 성공 처리, 예: 사용자 페이지로 리디렉션
+        localStorage.setItem('userToken', response.data.access_token);
+        onLoginSuccess(); // 로그인 성공 처리 함수 호출
+
+        // 로그인 성공 시 페이지 전환
+        setCurrentPage('upload'); // 예시로 'upload' 페이지로 전환
       } else {
         console.log("Login failed", response.data.message);
-        // 로그인 실패 처리
+        alert("Login failed");
       }
     } catch (error) {
       console.error("Login error", error);
+      alert("Login error: " + (error.response?.data?.detail || "An error occurred"));
     }
   };
   
-
   const imageContainerStyle = {
     flex: 1, // 이미지 컨테이너에 유연한 공간 배분
     display: 'flex', // 이미지 컨테이너 내에서도 flex 사용
@@ -141,27 +140,26 @@ function HomePage({ onStartClick }) {
       <div style={textContainerStyle}>
         <h1 style={textStyle}>오디오가 오디오</h1>
         <div style={imageContainerStyle}>
-        {/* public 폴더에서 이미지를 불러옵니다 */}
-        <img src="/startpage.png" alt="Start Page" style={imageStyle} />
-        <div style={loginContainerStyle}>
-          <input
-            type="text"
-            placeholder="ID"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-          />
+          <img src="/startpage.png" alt="Start Page" style={imageStyle} />
+          <div style={loginContainerStyle}>
+            <input
+              type="text"
+              placeholder="ID"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+          {/* 로그인 버튼에 handleLoginClick 함수 연결 */}
+          <Button label="로그인" onClick={handleLoginClick} />
         </div>
-        <Button label="로그인" onClick={onStartClick} />
-      </div>
-      
       </div>
     </div>
   );
@@ -190,7 +188,7 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
   
     try {
       // 파일 업로드 요청 (토큰 포함)
-      const response = await axios.post('http://localhost:8000/uploadfile', formData, {
+      const response = await axios.post('http://localhost:8000/files/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${userToken}`, // 헤더에 토큰 포함
@@ -227,15 +225,13 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
 
 // 세 번째 페이지 컴포넌트
 function TransformingPage({ onTransformComplete }) {
-  // 여기서 변환 로직을 구현할 수 있습니다.
-  // 예를 들어, 변환 로직이 완료되면 onTransformComplete()를 호출합니다.
-  
-  // 변환 완료를 시뮬레이션하기 위한 예시
+  // 변환 완료 시뮬레이션
   setTimeout(onTransformComplete, 2000); // 2초 후에 onTransformComplete 호출
 
   return (
     <div className="transforming-page">
       <h1>변환중...</h1>
+      <div className="spinner"></div> {/* Spinner 추가 */}
       {/* 여기에 로딩 인디케이터나 애니메이션을 추가할 수 있습니다. */}
     </div>
   );
@@ -254,8 +250,26 @@ function TransformationCompletePage({ onRestart }) {
 
 // App 컴포넌트
 function App() {
-  const [currentPage, setCurrentPage] = useState('home'); // 페이지 상태
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // 로그인 성공 시 호출될 함수
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
+  // 로그아웃 함수
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('userToken'); // 로컬 스토리지의 토큰 삭제
+  };
+
+  // 조건부 렌더링
+  if (isLoggedIn) {
+    return <UploadPage onGoBackClick={handleLogout} />;
+  } else {
+    return <HomePage onLoginSuccess={handleLoginSuccess} />;
+  }
   const handleStartClick = () => {
     setCurrentPage('upload');
   };
@@ -276,10 +290,38 @@ function App() {
     setCurrentPage('home'); // 처음으로 버튼 클릭 시 첫 페이지로 상태 변경
   };
 
+  const handleLoginClick = async (userId, password) => {
+    try {
+      const response = await axios.post('http://localhost:8000/users/login', 
+      {
+        login_id: userId,
+        login_pw: password,
+      });
+  
+      // 토큰이 반환되면 로그인 성공으로 간주
+      if (response.status === 200) {
+        console.log("Login successful", response.data);
+        localStorage.setItem('userToken', response.data.access_token);
+        setCurrentPage('upload');
+      }
+    } catch (error) {
+      if (error.response) {
+        // 백엔드에서 반환된 로그인 실패 메시지를 사용자에게 표시
+        const errorMessage = error.response.data.detail || error.response.data.message;
+        console.log("Login failed", errorMessage);
+        alert("Login failed: " + errorMessage);
+      } else {
+        // 다른 종류의 오류 처리
+        console.error("Login error", error);
+        alert("Login error: " + error.message);
+      }
+    }
+  };
+
   return (
     <div className="App">
       {currentPage === 'home' && (
-        <HomePage onStartClick={handleStartClick} />
+        <HomePage onStartClick={handleStartClick} onLoginClick={handleLoginClick} />
       )}
       {currentPage === 'upload' && (
         <UploadPage onGoBackClick={handleGoBackClick} onTransformClick={handleTransformClick} />
