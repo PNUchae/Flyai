@@ -8,13 +8,13 @@ import axios from 'axios';
 const styles = {
   Button: {
     cursor: 'pointer',
-    width: '134px',
-    height: '140px',
+    width: '170px',
+    height: '100px',
     padding: '10px 15px',
     border: '0',
     boxSizing: 'border-box',
     borderRadius: '24px',
-    backgroundColor: '#127de0',
+    backgroundColor: '#000050',
     color: '#ffffff',
     fontSize: '30px',
     fontFamily: 'Montserrat',
@@ -34,18 +34,23 @@ const defaultProps = {
 const Button = ({ label, onClick }) => {
   return (
     <button style={styles.Button} onClick={onClick}>
-      {label ?? defaultProps.label} // label 속성이 없을 경우 defaultProps.label을 사용합니다.
+      {label ?? defaultProps.label}
     </button>
   );
 };
 // 첫 번째 페이지 컴포넌트
 function HomePage({ onLoginSuccess }) {
   const containerStyle = {
-    display: 'flex', // Flex 컨테이너 설정
-    alignItems: 'center', // 아이템을 수직 방향에서 가운데 정렬
-    justifyContent: 'center', // 아이템을 수평 방향에서 가운데 정렬
-    height: '100vh', // 전체 뷰포트 높이를 사용
-    padding: '20px', // 컨테이너 내부 여백
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    padding: '20px',
+    backgroundImage: 'url("/startimage.png")', // 배경 이미지 설정
+    backgroundSize: 'cover', // 이미지가 컨테이너를 꽉 채우도록 설정
+    backgroundPosition: 'center', // 이미지를 중앙에 위치시킵니다.
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명한 흰색 레이어 추가
+    backgroundBlendMode: 'overlay', // 이미지와 색상 레이어를 혼합
   };
 
   const [userId, setUserId] = useState(''); // 사용자 ID 상태
@@ -98,9 +103,10 @@ function HomePage({ onLoginSuccess }) {
   };
 
   const textStyle = {
-    color: '#127de0', // 예제로 설정한 색상, 필요에 따라 변경 가능
-    fontSize: '2rem', // 큰 폰트 사이즈
+    color: '#000050', // 예제로 설정한 색상, 필요에 따라 변경 가능
+    fontSize: '5rem', // 큰 폰트 사이즈
     fontWeight: 'bold', // 글자 굵게
+    fontFamily: 'Arial, Helvetica, sans-serif'
   };
 
   const buttonStyle = {
@@ -134,13 +140,34 @@ function HomePage({ onLoginSuccess }) {
     width: '80%', // 입력 필드 너비
   };
 
-
+  const handleSignupClick = async () => {
+    try {
+      // 회원가입 요청
+      const response = await axios.post('http://localhost:8000/users/signup', {
+        login_id: userId,
+        login_pw: password,
+      });
+  
+      if (response.status === 200) {
+        console.log("Signup successful", response.data);
+        alert("Signup successful: " + response.data.message);
+        // 회원가입 성공 처리, 예: 로그인 페이지로 이동
+      } else {
+        console.log("Signup failed", response.data.message);
+        alert("Signup failed: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Signup error", error);
+      alert("Signup error: " + (error.response?.data?.detail || "An error occurred"));
+    }
+  };
+  
   return (
     <div style={containerStyle}>
       <div style={textContainerStyle}>
         <h1 style={textStyle}>오디오가 오디오</h1>
         <div style={imageContainerStyle}>
-          <img src="/startpage.png" alt="Start Page" style={imageStyle} />
+          <img src="" alt="" style={imageStyle} />       
           <div style={loginContainerStyle}>
             <input
               type="text"
@@ -159,6 +186,7 @@ function HomePage({ onLoginSuccess }) {
           </div>
           {/* 로그인 버튼에 handleLoginClick 함수 연결 */}
           <Button label="로그인" onClick={handleLoginClick} />
+          <Button label="회원가입" onClick={handleSignupClick} />  {/* 회원가입 버튼 추가 */}
         </div>
       </div>
     </div>
