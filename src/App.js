@@ -59,7 +59,7 @@ function HomePage({ onLoginSuccess }) {
 
   const handleLoginClick = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/users/login', {
+      const response = await axios.post('/users/login', {
         login_id: userId,
         login_pw: password,
       });
@@ -109,20 +109,7 @@ function HomePage({ onLoginSuccess }) {
     fontFamily: 'Arial, Helvetica, sans-serif'
   };
 
-  const buttonStyle = {
-    cursor: 'pointer',
-    padding: '10px 15px',
-    border: '0',
-    borderRadius: '24px',
-    backgroundColor: '#127de0',
-    color: '#ffffff',
-    fontSize: '1.5rem',
-    fontFamily: 'Montserrat',
-    fontWeight: '500',
-    lineHeight: '1.5',
-    outline: 'none',
-    marginTop: '20px', // 버튼 위쪽 여백 설정
-  };
+  
   const loginContainerStyle = {
     display: 'flex',
     flexDirection: 'column', // 요소들을 수직으로 쌓기
@@ -143,7 +130,7 @@ function HomePage({ onLoginSuccess }) {
   const handleSignupClick = async () => {
     try {
       // 회원가입 요청
-      const response = await axios.post('http://localhost:8000/users/signup', {
+      const response = await axios.post('/users/signup', {
         login_id: userId,
         login_pw: password,
       });
@@ -216,7 +203,7 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
   
     try {
       // 파일 업로드 요청 (토큰 포함)
-      const response = await axios.post('http://localhost:8000/files/upload', formData, {
+      const response = await axios.post('/files/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${userToken}`, // 헤더에 토큰 포함
@@ -235,10 +222,11 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
 
   return (
     <div className="upload-page">
+      
       <h1>업로드 페이지</h1>
       <input
         type="file"
-        accept=".mp3"
+        accept=".wav"
         onChange={handleFileChange}
         style={{ display: 'block', margin: '20px auto' }}
       />
@@ -316,6 +304,19 @@ function App() {
 
   const handleRestart = () => {
     setCurrentPage('home'); // 처음으로 버튼 클릭 시 첫 페이지로 상태 변경
+  };
+
+  const containerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    padding: '20px',
+    backgroundImage: 'url("/startimage.png")', // 배경 이미지 설정
+    backgroundSize: 'cover', // 이미지가 컨테이너를 꽉 채우도록 설정
+    backgroundPosition: 'center', // 이미지를 중앙에 위치시킵니다.
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명한 흰색 레이어 추가
+    backgroundBlendMode: 'overlay', // 이미지와 색상 레이어를 혼합
   };
 
   const handleLoginClick = async (userId, password) => {
