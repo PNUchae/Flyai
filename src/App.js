@@ -1,8 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from 'axios';
 
+
+const Card = (props) => {
+  return (
+    <div style={styles.Card}>
+      {props.children}
+    </div>
+  );
+};
 
 // Button 컴포넌트 스타일
 const styles = {
@@ -46,10 +54,10 @@ function HomePage({ onLoginSuccess }) {
     justifyContent: 'center',
     height: '100vh',
     padding: '20px',
-    backgroundImage: 'url("/startimage.png")', // 배경 이미지 설정
+    //backgroundImage: 'url("/startimage.png")', // 배경 이미지 설정
     backgroundSize: 'cover', // 이미지가 컨테이너를 꽉 채우도록 설정
     backgroundPosition: 'center', // 이미지를 중앙에 위치시킵니다.
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명한 흰색 레이어 추가
+    backgroundColor: '#f5f5f5', // 반투명한 흰색 레이어 추가
     backgroundBlendMode: 'overlay', // 이미지와 색상 레이어를 혼합
   };
 
@@ -115,16 +123,16 @@ function HomePage({ onLoginSuccess }) {
     flexDirection: 'column', // 요소들을 수직으로 쌓기
     alignItems: 'center', // 수직 방향 중앙 정렬
     justifyContent: 'center', // 수평 방향 중앙 정렬
-    margin: '10px', // 여백 설정
+    margin: '30px', // 여백 설정
   };
 
   const inputStyle = {
     margin: '10px',
     padding: '10px',
-    fontSize: '1rem',
-    borderRadius: '5px',
+    fontSize: '2rem',
+    borderRadius: '24px',
     border: '1px solid #ddd',
-    width: '80%', // 입력 필드 너비
+    width: '50%', // 입력 필드 너비
   };
 
   const handleSignupClick = async () => {
@@ -180,76 +188,108 @@ function HomePage({ onLoginSuccess }) {
   );
 }
 
-// 두 번째 페이지 컴포넌트
+
+//두 번째 페이지 컴포넌트
 function UploadPage({ onGoBackClick, onTransformClick }) {
-  const [file, setFile] = useState(null); // 선택된 파일을 관리하는 상태
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState(''); // 선택된 파일의 이름을 저장할 상태
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       console.log("Uploading file:", selectedFile.name);
       setFile(selectedFile); // 파일 상태 업데이트
+      setFileName(selectedFile.name); // 파일 이름 상태 업데이트
     }
   };
 
   const handleFileUpload = async () => {
     if (!file) return;
-  
-    // localStorage에서 토큰 가져오기
+
     const userToken = localStorage.getItem('userToken');
-  
+
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
-      // 파일 업로드 요청 (토큰 포함)
       const response = await axios.post('/files/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${userToken}`, // 헤더에 토큰 포함
+          'Authorization': `Bearer ${userToken}`,
         }
       });
-  
+
       if (response.status === 200) {
         console.log("File uploaded successfully");
-        // 파일 업로드 성공 처리
+        onTransformClick();
       }
     } catch (error) {
       console.error("There was an error uploading the file:", error);
-      // 에러 처리
+      onTransformClick();
     }
   };
 
   return (
-    <div className="upload-page">
-      
-      <h1>업로드 페이지</h1>
-      <input
-        type="file"
-        accept=".wav"
-        onChange={handleFileChange}
-        style={{ display: 'block', margin: '20px auto' }}
-      />
-      <div className="upload-page-buttons"> {/* 버튼 컨테이너 */}
-        <Button label= "돌아가기" onClick={onGoBackClick} className="upload-page-button" />
-        <Button label= "변환하기" onClick={handleFileUpload} disabled={!file} className="upload-page-button" /> {/* handleFileUpload 함수 호출 */}
+    <Card>
+      <div className="upload-page">
+        <h1 className="upload-page-title">업로드 페이지</h1>
+        {file ? (
+          <div
+          className="file-name-display"
+          style={{
+            fontSize: '16px',
+            fontFamily: 'Arial, sans-serif',
+            color: '#333',
+            margin: '10px 0'
+          }}
+        >
+          {fileName}
+        </div> // 선택된 파일의 이름 표시
+        ) : (
+          <button
+            type="button"
+            onClick={() => document.getElementById('file').click()}
+            className="upload-page-button file-button"
+          >
+            파일 선택
+          </button>
+        )}
+
+        <input
+          type="file"
+          id="file"
+          className="file-input"
+          accept=".wav"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+
+        <div className="upload-page-buttons">
+          <Button label="돌아가기" onClick={onGoBackClick} className="upload-page-button back-button" />
+          <Button label="변환하기" onClick={handleFileUpload} disabled={!file} className="upload-page-button transform-button" />
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
-
 // 세 번째 페이지 컴포넌트
 function TransformingPage({ onTransformComplete }) {
-  // 변환 완료 시뮬레이션
-  setTimeout(onTransformComplete, 2000); // 2초 후에 onTransformComplete 호출
+  useEffect(() => {
+    // 변환 완료 시뮬레이션
+    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 onTransformComplete 호출
+
+    // 컴포넌트가 언마운트될 때 타이머를 정리합니다.
+    return () => clearTimeout(timer);
+  }, [onTransformComplete]); // 의존성 배열에 onTransformComplete 추가
 
   return (
     <div className="transforming-page">
       <h1>변환중...</h1>
-      <div className="spinner"></div> {/* Spinner 추가 */}
-      {/* 여기에 로딩 인디케이터나 애니메이션을 추가할 수 있습니다. */}
-    </div>
+      <div className="spinner-container"> {/* 스피너를 중앙에 배치하기 위한 컨테이너 */}
+        <div className="spinner"></div> {/* 스피너 */}
+      </div>
+    </div> // 여기에 누락된 닫는 div 태그를 추가합니다.
   );
 }
 
@@ -267,27 +307,17 @@ function TransformationCompletePage({ onRestart }) {
 // App 컴포넌트
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // 로그인 성공 시 호출될 함수
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
+  const handleLoginSuccess = (token) => {
+    localStorage.setItem('userToken', token); // 토큰 저장
+    setCurrentPage('upload'); // 로그인 성공 시 업로드 페이지로 이동
   };
 
   // 로그아웃 함수
   const handleLogout = () => {
-    setIsLoggedIn(false);
     localStorage.removeItem('userToken'); // 로컬 스토리지의 토큰 삭제
-  };
-
-  // 조건부 렌더링
-  if (isLoggedIn) {
-    return <UploadPage onGoBackClick={handleLogout} />;
-  } else {
-    return <HomePage onLoginSuccess={handleLoginSuccess} />;
-  }
-  const handleStartClick = () => {
-    setCurrentPage('upload');
+    setCurrentPage('home'); // 로그아웃 시 홈 페이지로 이동
   };
 
   const handleGoBackClick = () => {
@@ -306,23 +336,9 @@ function App() {
     setCurrentPage('home'); // 처음으로 버튼 클릭 시 첫 페이지로 상태 변경
   };
 
-  const containerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    padding: '20px',
-    backgroundImage: 'url("/startimage.png")', // 배경 이미지 설정
-    backgroundSize: 'cover', // 이미지가 컨테이너를 꽉 채우도록 설정
-    backgroundPosition: 'center', // 이미지를 중앙에 위치시킵니다.
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명한 흰색 레이어 추가
-    backgroundBlendMode: 'overlay', // 이미지와 색상 레이어를 혼합
-  };
-
   const handleLoginClick = async (userId, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/users/login', 
-      {
+      const response = await axios.post('http://localhost:8000/users/login', {
         login_id: userId,
         login_pw: password,
       });
@@ -330,8 +346,7 @@ function App() {
       // 토큰이 반환되면 로그인 성공으로 간주
       if (response.status === 200) {
         console.log("Login successful", response.data);
-        localStorage.setItem('userToken', response.data.access_token);
-        setCurrentPage('upload');
+        handleLoginSuccess(response.data.access_token); // 로그인 성공 처리, 토큰을 인자로 전달
       }
     } catch (error) {
       if (error.response) {
@@ -350,10 +365,10 @@ function App() {
   return (
     <div className="App">
       {currentPage === 'home' && (
-        <HomePage onStartClick={handleStartClick} onLoginClick={handleLoginClick} />
+        <HomePage onLoginSuccess={handleLoginSuccess} />
       )}
       {currentPage === 'upload' && (
-        <UploadPage onGoBackClick={handleGoBackClick} onTransformClick={handleTransformClick} />
+        <UploadPage onGoBackClick={handleLogout} onTransformClick={handleTransformClick} />
       )}
       {currentPage === 'transforming' && (
         <TransformingPage onTransformComplete={handleTransformComplete} />
