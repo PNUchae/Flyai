@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
-
+import axiosInstance from './axiosConfig'; // axiosConfig 임포트
 
 const Card = (props) => {
   return (
@@ -67,16 +67,19 @@ function HomePage({ onLoginSuccess }) {
 
   const handleLoginClick = async () => {
     try {
-      const response = await axios.post('/users/login', {
+      // axiosInstance 사용하여 로그인 요청
+      const response = await axiosInstance.post('/users/login', {
         login_id: userId,
         login_pw: password,
       });
-
+  
       if (response.data.access_token) {
         console.log("Login successful", response.data);
+        // 로그인 성공시 access_token 저장
         localStorage.setItem('userToken', response.data.access_token);
+        localStorage.setItem('refreshToken', response.data.refresh_token); // 리프레시 토큰 저장
         onLoginSuccess(); // 로그인 성공 처리 함수 호출
-
+        
         // 로그인 성공 시 페이지 전환
         setCurrentPage('upload'); // 예시로 'upload' 페이지로 전환
       } else {
@@ -190,7 +193,7 @@ function HomePage({ onLoginSuccess }) {
 
 
 //두 번째 페이지 컴포넌트
-function UploadPage({ onGoBackClick, onTransformClick }) {
+function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(''); // 선택된 파일의 이름을 저장할 상태
 
@@ -205,30 +208,36 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
 
   const handleFileUpload = async () => {
     if (!file) return;
-
+  
     const userToken = localStorage.getItem('userToken');
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
-      const response = await axios.post('/files/upload', formData, {
+      const response = await axiosInstance.post('/files/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${userToken}`,
         }
       });
-
-      if (response.status === 200) {
+  
+      if (response.status === 200 && response.data.results) {
         console.log("File uploaded successfully");
+        const results = response.data.results.map(result => ({
+          ResultFilePath: result.ResultFilePath, // URL 속성
+          Converted_Result: result.Converted_Result // 변환 결과 속성
+        }));
+        setTransformedResults(results); // 상태 업데이트
         onTransformClick();
+      } else {
+        console.log("Failed to upload file or missing results in response");
       }
     } catch (error) {
       console.error("There was an error uploading the file:", error);
-      onTransformClick();
     }
   };
-
+  
   return (
     <Card>
       <div className="upload-page">
@@ -273,31 +282,64 @@ function UploadPage({ onGoBackClick, onTransformClick }) {
   );
 }
 
-// 세 번째 페이지 컴포넌트
-function TransformingPage({ onTransformComplete }) {
+// 세 번째 컴포넌트
+function TransformingPage({ transformedResults, onTransformComplete }) {
   useEffect(() => {
-    // 변환 완료 시뮬레이션
-    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 onTransformComplete 호출
-
-    // 컴포넌트가 언마운트될 때 타이머를 정리합니다.
+    if (Array.isArray(transformedResults) && transformedResults.length > 0) {
+      transformedResults.forEach(result => {
+        console.log(`파일 URL: ${result.ResultFilePath}, 변환 결과: ${result.Converted_Result}`);
+      });
+    } else {
+      console.log("사용 가능한 파일 URL이 없습니다.");
+    }
+    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 변환 완료 처리
+  
     return () => clearTimeout(timer);
-  }, [onTransformComplete]); // 의존성 배열에 onTransformComplete 추가
+  }, [transformedResults, onTransformComplete]);
 
   return (
     <div className="transforming-page">
-      <h1>변환중...</h1>
-      <div className="spinner-container"> {/* 스피너를 중앙에 배치하기 위한 컨테이너 */}
-        <div className="spinner"></div> {/* 스피너 */}
+      <h1>변환 중...</h1>
+      <div className="spinner-container">
+        <div className="spinner"></div>
       </div>
-    </div> // 여기에 누락된 닫는 div 태그를 추가합니다.
+    </div>
   );
 }
 
 // 네 번째 페이지 컴포넌트
-function TransformationCompletePage({ onRestart }) {
+function TransformationCompletePage({ transformedResults, onRestart }) {
+  const audioRefs = useRef([]);
+
+  useEffect(() => {
+    audioRefs.current = audioRefs.current.slice(0, transformedResults.length);
+  }, [transformedResults]);
+
+  const togglePlay = (index) => {
+    const audio = audioRefs.current[index];
+    if (audio) {
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
+  };
+
   return (
     <div className="transformation-complete-page">
       <h1>변환 완료!</h1>
+      <div className="audio-players" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+        {transformedResults.map((result, index) => (
+          <div key={index} className="audio-player" style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
+            <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls style={{ flexGrow: 1 }}>
+              Your browser does not support the audio element.
+            </audio>
+            <button onClick={() => togglePlay(index)} style={{ flexGrow: 0, marginRight: '10px' }}>Play/Pause</button>
+            <input type="checkbox" style={{ flexGrow: 0 }} />
+          </div>
+        ))}
+      </div>
       <Button label="처음으로" onClick={onRestart} />
     </div>
   );
@@ -307,10 +349,10 @@ function TransformationCompletePage({ onRestart }) {
 // App 컴포넌트
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [transformedResults, setTransformedResults] = useState([]);
 
   // 로그인 성공 시 호출될 함수
-  const handleLoginSuccess = (token) => {
-    localStorage.setItem('userToken', token); // 토큰 저장
+  const handleLoginSuccess = () => {
     setCurrentPage('upload'); // 로그인 성공 시 업로드 페이지로 이동
   };
 
@@ -336,46 +378,27 @@ function App() {
     setCurrentPage('home'); // 처음으로 버튼 클릭 시 첫 페이지로 상태 변경
   };
 
-  const handleLoginClick = async (userId, password) => {
-    try {
-      const response = await axios.post('http://localhost:8000/users/login', {
-        login_id: userId,
-        login_pw: password,
-      });
-  
-      // 토큰이 반환되면 로그인 성공으로 간주
-      if (response.status === 200) {
-        console.log("Login successful", response.data);
-        handleLoginSuccess(response.data.access_token); // 로그인 성공 처리, 토큰을 인자로 전달
-      }
-    } catch (error) {
-      if (error.response) {
-        // 백엔드에서 반환된 로그인 실패 메시지를 사용자에게 표시
-        const errorMessage = error.response.data.detail || error.response.data.message;
-        console.log("Login failed", errorMessage);
-        alert("Login failed: " + errorMessage);
-      } else {
-        // 다른 종류의 오류 처리
-        console.error("Login error", error);
-        alert("Login error: " + error.message);
-      }
-    }
-  };
-
   return (
     <div className="App">
-      {currentPage === 'home' && (
-        <HomePage onLoginSuccess={handleLoginSuccess} />
-      )}
+      {currentPage === 'home' && <HomePage onLoginSuccess={handleLoginSuccess} />}
       {currentPage === 'upload' && (
-        <UploadPage onGoBackClick={handleLogout} onTransformClick={handleTransformClick} />
+        // Pass setTransformedResults to UploadPage to handle state update
+        <UploadPage
+          onGoBackClick={handleLogout}
+          onTransformClick={handleTransformClick}
+          setTransformedResults={setTransformedResults}
+        />
       )}
       {currentPage === 'transforming' && (
-        <TransformingPage onTransformComplete={handleTransformComplete} />
+        // Pass transformedResults to TransformingPage for display
+        <TransformingPage
+          transformedResults={transformedResults}
+          onTransformComplete={handleTransformComplete}
+        />
       )}
       {currentPage === 'transformationComplete' && (
-        <TransformationCompletePage onRestart={handleRestart} />
-      )}
+  <TransformationCompletePage transformedResults={transformedResults} onRestart={handleRestart} />
+)}
     </div>
   );
 }
