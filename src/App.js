@@ -292,7 +292,7 @@ function TransformingPage({ transformedResults, onTransformComplete }) {
     } else {
       console.log("사용 가능한 파일 URL이 없습니다.");
     }
-    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 변환 완료 처리
+    const timer = setTimeout(onTransformComplete, 50000); // 5초 후에 변환 완료 처리
   
     return () => clearTimeout(timer);
   }, [transformedResults, onTransformComplete]);
@@ -308,12 +308,38 @@ function TransformingPage({ transformedResults, onTransformComplete }) {
 }
 
 // 네 번째 페이지 컴포넌트
-function TransformationCompletePage({ transformedResults, onRestart }) {
+function TransformationCompletePage({ transformedResults, onRestart, onBackToUpload }) {
   const audioRefs = useRef([]);
+  const [checkedItems, setCheckedItems] = useState(new Set()); // 체크된 아이템들의 목록
 
   useEffect(() => {
     audioRefs.current = audioRefs.current.slice(0, transformedResults.length);
   }, [transformedResults]);
+  const handleCheckboxChange = (resultFilePath, isChecked) => {
+    setCheckedItems(prev => {
+      const updated = new Set(prev);
+      if (isChecked) {
+        updated.add(resultFilePath);
+      } else {
+        updated.delete(resultFilePath);
+      }
+      return updated;
+    });
+  };
+
+  const handleSubmitCheckedItems = async () => {
+    // 체크된 아이템들을 백엔드에 전송하는 로직
+    const checkedUrls = Array.from(checkedItems);
+    try {
+      // 예를 들어, 체크된 URL 목록을 백엔드에 전송하는 코드
+      // 이 부분은 백엔드 API의 구현에 따라 달라질 수 있습니다.
+      await axios.post('/api/send-results', { urls: checkedUrls });
+      alert('결과가 성공적으로 전송되었습니다.');
+    } catch (error) {
+      console.error('결과 전송 중 오류가 발생했습니다:', error);
+      alert('결과 전송 실패');
+    }
+  };
 
   const togglePlay = (index) => {
     const audio = audioRefs.current[index];
@@ -329,21 +355,26 @@ function TransformationCompletePage({ transformedResults, onRestart }) {
   return (
     <div className="transformation-complete-page">
       <h1>변환 완료!</h1>
-      <div className="audio-players" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+      <div className="audio-players">
         {transformedResults.map((result, index) => (
-          <div key={index} className="audio-player" style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
-            <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls style={{ flexGrow: 1 }}>
+          <div key={index} className="audio-player">
+            <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls>
               Your browser does not support the audio element.
             </audio>
-            <button onClick={() => togglePlay(index)} style={{ flexGrow: 0, marginRight: '10px' }}>Play/Pause</button>
-            <input type="checkbox" style={{ flexGrow: 0 }} />
+            <button onClick={() => togglePlay(index)}>Play/Pause</button>
+            <input
+              type="checkbox"
+              onChange={e => handleCheckboxChange(result.ResultFilePath, e.target.checked)}
+            />
           </div>
         ))}
       </div>
-      <Button label="처음으로" onClick={onRestart} />
+      <Button label="메인" onClick={onRestart} />
+      <Button label="결과 전송" onClick={handleSubmitCheckedItems} /> {/* 결과 전송 버튼 */}
     </div>
   );
 }
+
 
 
 // App 컴포넌트
@@ -377,6 +408,9 @@ function App() {
   const handleRestart = () => {
     setCurrentPage('home'); // 처음으로 버튼 클릭 시 첫 페이지로 상태 변경
   };
+  const handleBackToUpload = () => {
+    setCurrentPage('upload'); // 두 번째 페이지로 상태 변경
+  };
 
   return (
     <div className="App">
@@ -397,7 +431,11 @@ function App() {
         />
       )}
       {currentPage === 'transformationComplete' && (
-  <TransformationCompletePage transformedResults={transformedResults} onRestart={handleRestart} />
+  <TransformationCompletePage
+  transformedResults={transformedResults}
+  onRestart={handleRestart}
+  onBackToUpload={handleBackToUpload} // 이 함수를 props로 전달
+/>
 )}
     </div>
   );
