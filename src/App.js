@@ -225,8 +225,10 @@ function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) 
       if (response.status === 200 && response.data.results) {
         console.log("File uploaded successfully");
         const results = response.data.results.map(result => ({
-          ResultFilePath: result.ResultFilePath, // URL 속성
-          Converted_Result: result.Converted_Result // 변환 결과 속성
+          result_id: result.result_id, // 추가된 정보
+          Index: result.Index, // 추가된 정보
+          Converted_Result: result.Converted_Result,
+          ResultFilePath: result.ResultFilePath,
         }));
         setTransformedResults(results); // 상태 업데이트
         onTransformClick();
@@ -308,38 +310,12 @@ function TransformingPage({ transformedResults, onTransformComplete }) {
 }
 
 // 네 번째 페이지 컴포넌트
-function TransformationCompletePage({ transformedResults, onRestart, onBackToUpload }) {
+function TransformationCompletePage({ transformedResults, onRestart }) {
   const audioRefs = useRef([]);
-  const [checkedItems, setCheckedItems] = useState(new Set()); // 체크된 아이템들의 목록
 
   useEffect(() => {
     audioRefs.current = audioRefs.current.slice(0, transformedResults.length);
   }, [transformedResults]);
-  const handleCheckboxChange = (resultFilePath, isChecked) => {
-    setCheckedItems(prev => {
-      const updated = new Set(prev);
-      if (isChecked) {
-        updated.add(resultFilePath);
-      } else {
-        updated.delete(resultFilePath);
-      }
-      return updated;
-    });
-  };
-
-  const handleSubmitCheckedItems = async () => {
-    // 체크된 아이템들을 백엔드에 전송하는 로직
-    const checkedUrls = Array.from(checkedItems);
-    try {
-      // 예를 들어, 체크된 URL 목록을 백엔드에 전송하는 코드
-      // 이 부분은 백엔드 API의 구현에 따라 달라질 수 있습니다.
-      await axios.post('/api/send-results', { urls: checkedUrls });
-      alert('결과가 성공적으로 전송되었습니다.');
-    } catch (error) {
-      console.error('결과 전송 중 오류가 발생했습니다:', error);
-      alert('결과 전송 실패');
-    }
-  };
 
   const togglePlay = (index) => {
     const audio = audioRefs.current[index];
@@ -352,25 +328,43 @@ function TransformationCompletePage({ transformedResults, onRestart, onBackToUpl
     }
   };
 
+  const handleCheckboxChange = async (resultId, index, isChecked) => {
+    const endpoint = isChecked ? '/histories/apply' : '/histories/cancel';
+    try {
+      // JSON.stringify 제거 및 직접 객체 전달
+      await axios.post(endpoint, { result_id: resultId, Index: index }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log(`결과가 성공적으로 ${isChecked ? '적용' : '취소'}되었습니다.`);
+    } catch (error) {
+      console.error(`결과 ${isChecked ? '적용' : '취소'} 중 오류가 발생했습니다.`, error);
+    }
+  };
+
   return (
     <div className="transformation-complete-page">
       <h1>변환 완료!</h1>
       <div className="audio-players">
         {transformedResults.map((result, index) => (
-          <div key={index} className="audio-player">
+          <div key={index} className="audio-player" style={{ marginBottom: '20px' }}>
             <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls>
               Your browser does not support the audio element.
             </audio>
-            <button onClick={() => togglePlay(index)}>Play/Pause</button>
-            <input
-              type="checkbox"
-              onChange={e => handleCheckboxChange(result.ResultFilePath, e.target.checked)}
-            />
+            <div>
+              <button onClick={() => togglePlay(index)}>Play/Pause</button>
+              <input
+                type="checkbox"
+                onChange={e => handleCheckboxChange(result.result_id, result.Index, e.target.checked)}
+              />
+            </div>
+            {/* Converted_Result 값을 표시하는 부분 */}
+            <p>{result.Converted_Result}</p>
           </div>
         ))}
       </div>
       <Button label="메인" onClick={onRestart} />
-      <Button label="결과 전송" onClick={handleSubmitCheckedItems} /> {/* 결과 전송 버튼 */}
     </div>
   );
 }
