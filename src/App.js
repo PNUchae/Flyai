@@ -192,17 +192,17 @@ function HomePage({ onLoginSuccess }) {
 }
 
 
-//두 번째 페이지 컴포넌트
+// 두 번째 페이지 컴포넌트
 function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) {
   const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState(''); // 선택된 파일의 이름을 저장할 상태
+  const [fileName, setFileName] = useState('');
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       console.log("Uploading file:", selectedFile.name);
-      setFile(selectedFile); // 파일 상태 업데이트
-      setFileName(selectedFile.name); // 파일 이름 상태 업데이트
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
     }
   };
 
@@ -215,22 +215,25 @@ function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) 
     formData.append('file', file);
   
     try {
-      const response = await axiosInstance.post('/files/upload', formData, {
+      const response = await axios.post('/files/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${userToken}`,
-        }
+        },
       });
   
       if (response.status === 200 && response.data.results) {
         console.log("File uploaded successfully");
         const results = response.data.results.map(result => ({
-          result_id: result.result_id, // 추가된 정보
-          Index: result.Index, // 추가된 정보
+          result_id: result.result_id,
+          audio_id: result.audio_id,
+          Index: result.Index,
           Converted_Result: result.Converted_Result,
           ResultFilePath: result.ResultFilePath,
+          ResultFileLength: result.ResultFileLength,
+          Converted_Date: result.Converted_Date,
         }));
-        setTransformedResults(results); // 상태 업데이트
+        setTransformedResults(results);
         onTransformClick();
       } else {
         console.log("Failed to upload file or missing results in response");
@@ -245,36 +248,15 @@ function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) 
       <div className="upload-page">
         <h1 className="upload-page-title">업로드 페이지</h1>
         {file ? (
-          <div
-          className="file-name-display"
-          style={{
-            fontSize: '16px',
-            fontFamily: 'Arial, sans-serif',
-            color: '#333',
-            margin: '10px 0'
-          }}
-        >
-          {fileName}
-        </div> // 선택된 파일의 이름 표시
+          <div className="file-name-display" style={{ fontSize: '16px', fontFamily: 'Arial, sans-serif', color: '#333', margin: '10px 0' }}>
+            {fileName}
+          </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => document.getElementById('file').click()}
-            className="upload-page-button file-button"
-          >
+          <button type="button" onClick={() => document.getElementById('file').click()} className="upload-page-button file-button">
             파일 선택
           </button>
         )}
-
-        <input
-          type="file"
-          id="file"
-          className="file-input"
-          accept=".wav"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
-
+        <input type="file" id="file" className="file-input" accept=".wav" onChange={handleFileChange} style={{ display: 'none' }} />
         <div className="upload-page-buttons">
           <Button label="돌아가기" onClick={onGoBackClick} className="upload-page-button back-button" />
           <Button label="변환하기" onClick={handleFileUpload} disabled={!file} className="upload-page-button transform-button" />
@@ -294,7 +276,7 @@ function TransformingPage({ transformedResults, onTransformComplete }) {
     } else {
       console.log("사용 가능한 파일 URL이 없습니다.");
     }
-    const timer = setTimeout(onTransformComplete, 50000); // 5초 후에 변환 완료 처리
+    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 변환 완료 처리
   
     return () => clearTimeout(timer);
   }, [transformedResults, onTransformComplete]);
@@ -328,11 +310,16 @@ function TransformationCompletePage({ transformedResults, onRestart }) {
     }
   };
 
-  const handleCheckboxChange = async (resultId, index, isChecked) => {
-    const endpoint = isChecked ? '/histories/apply' : '/histories/cancel';
+  const handleCheckboxChange = async (resultId, isChecked) => {
+
+    // 우선 테스트용으로 effect_sound_id를 1로 고정
+    const effectSoundId = 1;
+    const endpoint = isChecked ? '/histories/apply' : '/histories/cancel'; 
     try {
-      // JSON.stringify 제거 및 직접 객체 전달
-      await axios.post(endpoint, { result_id: resultId, Index: index }, {
+      await axios.post(endpoint, {
+        result_id: resultId,
+        effect_sound_id: effectSoundId, // 여기에 고정된 effect_sound_id를 사용
+      }, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -348,7 +335,7 @@ function TransformationCompletePage({ transformedResults, onRestart }) {
       <h1>변환 완료!</h1>
       <div className="audio-players">
         {transformedResults.map((result, index) => (
-          <div key={index} className="audio-player" style={{ marginBottom: '20px' }}>
+          <div key={result.result_id} className="audio-player" style={{ marginBottom: '20px' }}>
             <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls>
               Your browser does not support the audio element.
             </audio>
@@ -356,10 +343,9 @@ function TransformationCompletePage({ transformedResults, onRestart }) {
               <button onClick={() => togglePlay(index)}>Play/Pause</button>
               <input
                 type="checkbox"
-                onChange={e => handleCheckboxChange(result.result_id, result.Index, e.target.checked)}
+                onChange={e => handleCheckboxChange(result.result_id, e.target.checked)}
               />
             </div>
-            {/* Converted_Result 값을 표시하는 부분 */}
             <p>{result.Converted_Result}</p>
           </div>
         ))}
