@@ -27,52 +27,281 @@
   cursor: not-allowed;
 }
 
-/* 배경, 텍스트, 이미지 컨테이너 등 모든 페이지에 공통적인 스타일 */
-.home-page, .upload-page, .transforming-page, .transformation-complete-page {
+/* .upload-page 잠시 제거 배경, 텍스트, 이미지 컨테이너 등 모든 페이지에 공통적인 스타일 */
+.home-page, .transforming-page, .transformation-complete-page {
+  width: 100%; /* 전체 너비 사용 */
+  max-width: 1200px; /* 최대 너비 설정, 필요에 따라 조정 가능 */
+  margin: auto; /* 가운데 정렬 */
+  padding: 20px; /* 여백 추가 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #f5f5f5;
-  height: 100vh;
   text-align: center;
 }
 
-.home-page h1, .upload-page h1, .transforming-page h1, .transformation-complete-page h1 {
+.home-page h1, .transforming-page h1, .transformation-complete-page h1 {
   margin: 20px;
   font-size: 2em;
 }
 
-/* 로그인 및 업로드 페이지 특화 스타일 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  padding-bottom: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo-image {
+  height: 48px;
+  margin-right: 8px;
+}
+
+.logo-text {
+  color: #3617ce;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.header-middle {
+  display: flex;
+}
+
+.button-link {
+  background-color: transparent;
+  border: none;
+  color: #3617ce;
+  padding: 8px 16px;
+  font-size: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon {
+  height: 24px;
+  margin-left: 8px;
+}
+
+.body {
+  display: flex;
+  justify-content: flex-end;
+  padding: 32px;
+  padding-top: 100px;
+}
+
+.body-left {
+  flex: 1;
+}
+
+.body-text-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.intro-text {
+  color: #000000;
+  font-size: 60px;
+  font-family: 'Arial';
+  font-weight: 500;
+  line-height: 52px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.intro-text2 {
+  color: #000000;
+  font-size: 20px;
+  font-family: 'Arial';
+  font-weight: 500;
+  line-height: 32px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.homepage-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 20px; /* 버튼 배치 조정 */
+}
+.start-button {
+  background-color: #3617ce;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 16px;
+  border-radius: 13px;
+  box-sizing: border-box;
+  line-height: 31px;
+  font-family: Work Sans;
+  outline: none;
+  top: 554px;
+  left: 105px;
+  width: 205px;
+  height: 67px;
+  padding: 0px 8px;
+}
+
+.demo-button {
+  background-color: #ffffff;
+  color: #3617ce;
+  padding: 12px 24px;
+  border-radius: 13px;
+  gap: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row-reverse;
+  font-size: 18px;
+  font-family: Work Sans;
+  font-weight: 500;
+  line-height: 21px;
+  outline: none;
+  border: none;
+}
+/* demo-button 안에 들어가는 화살표 아이콘
+.Icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: var(--button-color);
+  fill: var(--button-color);
+}
+*/
+.main-image {
+  height: 100%;
+  max-width: 70%;
+  margin-left: auto;
+  margin-right: 0;
+}
+/* 로그인 및 업로드 페이지 특화 스타일 
 .home-page button, .upload-page button {
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 1em;
+} */
+
+
+/* 업로드 페이지 박스안에 들어갈 요소 
+.upload-box{
+  top: '47px';
+  left: '495px';
+  width: '640px';
+  height: '550px';
+  background-color: '#ffffff';
+  border-radius: '24px';
+}*/
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 45px;
+  top: 47px;
+  left: 495px;
+  width: 640px;
+  height: 550px;
+  background-color: #ffffff;
+  border-radius: 24px;
+}
+.innercard {
+  top: 167px;
+  left: 519px;
+  width: 592px;
+  height: 406px;
+  background-color: #f5f5f5;
+  border-radius: 20px;
 }
 
 .upload-page-buttons {
   display: flex;
   justify-content: space-around;
   width: 100%;
-  margin-top: 20px; /* 버튼 배치 조정 */
+  margin-top: 20px;
 }
 
-.file-name-display, .page-header {
+.upload-button {
+  cursor: pointer;
+  padding: 10px 20px;
+  border: 0.5px solid #3617ce;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #3617ce;
+  font-size: 18px;
+  font-family: 'Arial, sans-serif';
+  font-weight: 500;
+}
+
+.upload-button:hover {
+  background-color: #d2c9ff;
+}
+
+.file-name-display {
   font-size: 25px;
-  color: #5f5f5f;
+  color: #f5f5f5;
   margin: 10px 0;
 }
 
 /* App.css */
-
-.spinner {
-  border: 4px solid rgba(72, 37, 47, 0.432);
-  border-radius: 24px;
-  border-top: 4px solid #B3C4E5;
+div.spinner {
+  position: relative;
   width: 200px;
   height: 200px;
-  animation: spin 2s linear infinite;
+  display: inline-block;
+  background: #f5f5f5;
+  border-radius: 20px;
 }
+.spinner-container {
+  display: flex;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  height: 100vh; /* 전체 뷰포트 높이 */
+}
+
+div.spinner div {
+  width: 6%;
+  height: 16%;
+  background: #3617ce;
+  position: absolute;
+  left: 49%;
+  top: 43%;
+  opacity: 0;
+  border-radius: 50px; /* 최신 CSS에 맞게 수정 */
+  box-shadow: 0 0 3px rgba(0,0,0,0.2); /* 최신 CSS에 맞게 수정 */
+  animation: fade 1s linear infinite; /* 최신 CSS에 맞게 수정 */
+}
+
+@keyframes fade {
+  from {opacity: 1;}
+  to {opacity: 0.25;}
+}
+
+div.spinner div.bar1 { transform: rotate(0deg) translate(0, -130%); animation-delay: 0s; }
+div.spinner div.bar2 { transform: rotate(30deg) translate(0, -130%); animation-delay: -0.9167s; }
+div.spinner div.bar3 { transform: rotate(60deg) translate(0, -130%); animation-delay: -0.833s; }
+div.spinner div.bar4 { transform: rotate(90deg) translate(0, -130%); animation-delay: -0.7497s; }
+div.spinner div.bar5 { transform: rotate(120deg) translate(0, -130%); animation-delay: -0.667s; }
+div.spinner div.bar6 { transform: rotate(150deg) translate(0, -130%); animation-delay: -0.5837s; }
+div.spinner div.bar7 { transform: rotate(180deg) translate(0, -130%); animation-delay: -0.5s; }
+div.spinner div.bar8 { transform: rotate(210deg) translate(0, -130%); animation-delay: -0.4167s; }
+div.spinner div.bar9 { transform: rotate(240deg) translate(0, -130%); animation-delay: -0.333s; }
+div.spinner div.bar10 { transform: rotate(270deg) translate(0, -130%); animation-delay: -0.2497s; }
+div.spinner div.bar11 { transform: rotate(300deg) translate(0, -130%); animation-delay: -0.167s; }
+div.spinner div.bar12 { transform: rotate(330deg) translate(0, -130%); animation-delay: -0.0833s; }
 
 
 /* App.css */
@@ -100,24 +329,4 @@
   line-height: 39px;
   outline: none;
   margin: 10px; /* 버튼 간격 */
-}
-
-.card {
-  border-radius: 24px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-/* 스피너 애니메이션 */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 스피너를 중앙에 배치하기 위한 부모 요소 스타일 */
-.spinner-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* 뷰포트 높이의 100% */
 }
