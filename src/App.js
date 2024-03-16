@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
 import axiosInstance from './axiosConfig'; // axiosConfig 임포트
-
+/*
+// Card 컴포넌트 기본 스타일
 const Card = (props) => {
   return (
     <div style={styles.Card}>
@@ -11,7 +11,7 @@ const Card = (props) => {
     </div>
   );
 };
-
+*/
 // Button 컴포넌트 스타일
 const styles = {
   Button: {
@@ -91,51 +91,24 @@ function HomePage({ onLoginSuccess }) {
       alert("Login error: " + (error.response?.data?.detail || "An error occurred"));
     }
   };
-  
-  const imageContainerStyle = {
-    flex: 1, // 이미지 컨테이너에 유연한 공간 배분
-    display: 'flex', // 이미지 컨테이너 내에서도 flex 사용
-    justifyContent: 'center', // 이미지를 수평 방향에서 가운데 정렬
-    alignItems: 'center', // 이미지를 수직 방향에서 가운데 정렬
-  };
 
-  const imageStyle = {
-    maxWidth: '100%', // 이미지의 최대 너비를 컨테이너의 100%로 설정
-    maxHeight: '80vh', // 이미지의 최대 높이를 뷰포트 높이의 80%로 설정
-    borderRadius: '24px', // 이미지 모서리 둥글게
-  };
-
-  const textContainerStyle = {
-    flex: 1, // 텍스트 컨테이너에 유연한 공간 배분
-    display: 'flex',
-    flexDirection: 'column', // 요소들을 수직으로 쌓기
-    alignItems: 'center', // 수직 방향 중앙 정렬
-    justifyContent: 'center', // 수평 방향 중앙 정렬
-  };
-
-  const textStyle = {
-    color: '#000050', // 예제로 설정한 색상, 필요에 따라 변경 가능
-    fontSize: '5rem', // 큰 폰트 사이즈
-    fontWeight: 'bold', // 글자 굵게
-    fontFamily: 'Arial, Helvetica, sans-serif'
-  };
-
-  
   const loginContainerStyle = {
     display: 'flex',
-    flexDirection: 'column', // 요소들을 수직으로 쌓기
-    alignItems: 'center', // 수직 방향 중앙 정렬
-    justifyContent: 'center', // 수평 방향 중앙 정렬
-    margin: '30px', // 여백 설정
+    flexDirection: 'column',
+    // alignItems: 'flex-start', // 이 속성은 column 방향에서는 주로 세로 정렬에 영향을 줍니다.
+    justifyContent: 'center',
+    margin: '30px 30px 30px 0px', // 좌우 마진을 제거하거나 조정
+    padding: '0', // 필요에 따라 조정
+    width: '70%', // 컨테이너 너비를 부모에 맞춤
   };
-
+  
   const inputStyle = {
-    margin: '10px',
+    margin: '10px 10px 10px 0', // 상하 마진만 적용, 좌우 마진 조정
     padding: '10px',
-    fontSize: '2rem',
+    fontSize: '1.5rem',
     borderRadius: '24px',
     border: '1px solid #ddd',
-    width: '50%', // 입력 필드 너비
+    width: '70%', // 입력 필드 너비를 조정하여 부모 컨테이너와 일치시킴
   };
 
   const handleSignupClick = async () => {
@@ -161,12 +134,43 @@ function HomePage({ onLoginSuccess }) {
   };
   
   return (
-    <div style={containerStyle}>
-      <div style={textContainerStyle}>
-        <h1 style={textStyle}>오디오가 오디오</h1>
-        <div style={imageContainerStyle}>
-          <img src="" alt="" style={imageStyle} />       
-          <div style={loginContainerStyle}>
+    <div className="Home">
+      <header className="header" style={{ backgroundColor: '#f5f5f5' }}>
+      <div className="header-left">
+        <img src="logo2.png" alt="logo_img" className="logo-image" />
+        <div className="logo-text"> Where is Audio</div>
+      </div>
+      <div className="header-middle">
+        <button className="button-link">Home</button>
+        <button className="button-link">Files</button>
+        <button className="button-link">History</button>
+      </div>
+      <div className="header-right">
+        <button className="button-link">Sign In</button>
+        <button className="button-link">Log In</button>
+        <img src="accountIcon.png" alt="account_img" className="header-icon" />
+        <img src="searchIcon.png" alt="search_img" className="header-icon" />
+        <img src="menuIcon.png" alt="menu_img" className="header-icon" />
+      </div>
+    </header>
+      <div className="body">
+  <div className="body-text-container">
+    <div className="intro-text">
+      Find perfect place for
+    </div>
+    <div className="intro-text">
+      sound effects
+    </div>
+    <div className="intro-text">
+      on your audio books.
+    </div>
+    <div className="intro-text2">
+      오디오북 효과음 생성 위치 추천 및 효과음, 배경음악 생성 서비스
+    </div>
+
+    <div className="login-and-actions" style={{ display: 'flex', alignItems: 'center'}}>
+          {/* ID 및 Password 입력 필드 컨테이너 */}
+          <div style={{ ...loginContainerStyle, flexDirection: 'column', flex: 1}}>
             <input
               type="text"
               placeholder="ID"
@@ -182,21 +186,29 @@ function HomePage({ onLoginSuccess }) {
               style={inputStyle}
             />
           </div>
-          {/* 로그인 버튼에 handleLoginClick 함수 연결 */}
-          <Button label="로그인" onClick={handleLoginClick} />
-          <Button label="회원가입" onClick={handleSignupClick} />  {/* 회원가입 버튼 추가 */}
+
+          {/* 버튼 컨테이너 */}
+          <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column' }}>
+            <button className="start-button" onClick={handleLoginClick} style={{ marginBottom: '20px' }}>Start</button>
+            <button className="demo-button" onClick={handleSignupClick}>Sign Up</button>
+          </div>
         </div>
       </div>
+
+      <div className="body-left">
+      <img src="home_main.png" alt="main Image" className="main-image" />
     </div>
+  </div> 
+</div>
   );
 }
 
 
 // 두 번째 페이지 컴포넌트
-function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults, setAudioId }) {
+function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults }) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
-
+  
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -224,12 +236,6 @@ function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults, se
   
       if (response.status === 200 && response.data.results) {
         console.log("File uploaded successfully");
-        // 파일 업로드에 성공한 후, 응답으로 받은 audio_id를 상태에 저장
-        const firstAudioId = response.data.results[0]?.audio_id; // 예시로 첫 번째 audio_id 사용
-        setAudioId(firstAudioId); // 상태 업데이트
-
-        console.log(firstAudioId)
-        
         const results = response.data.results.map(result => ({
           result_id: result.result_id,
           audio_id: result.audio_id,
@@ -243,32 +249,56 @@ function UploadPage({ onGoBackClick, onTransformClick, setTransformedResults, se
         onTransformClick();
       } else {
         console.log("Failed to upload file or missing results in response");
+        onTransformClick();
       }
     } catch (error) {
       console.error("There was an error uploading the file:", error);
+      onTransformClick();
     }
   };
   
+  function Sidebar() {
+    return (
+      <div className="sidebar">
+        <div className="profile-image"></div>
+        <div className="menu-item1"><span className="icon">&#x1F4C8;</span>My Cloud</div>
+        <div className="whitebackground">
+          <div className="menu-item2"><span className="icon">&#x1F4C9;</span>Upload</div>
+        </div>
+        <div className="menu-item3"><span className="icon">&#x1F4CA;</span>Recent files</div>
+        <div className="menu-item4"><span className="icon">&#x1F4CB;</span>Trash bins</div>
+        <div className="menu-item5"><span className="icon">&#x1F4CC;</span>Settings</div>
+        <div className="menu-item6"><span className="icon">&#x1F4CD;</span>Logout</div>
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <div className="upload-page">
-        <h1 className="upload-page-title">업로드 페이지</h1>
+    <div className="container">
+      <Sidebar />
+    <div className="upload-page">
+    <div className="card">
+      <h1>Upload files</h1>
+      <div className="innercard">
+        <img src="uploadIcon_big.png" alt="upload_img" className="upload-icon"/>
+        <h2 className="upload-title">Drag & drop your files here</h2>
+        <p className="upload-description">or</p>
         {file ? (
-          <div className="file-name-display" style={{ fontSize: '16px', fontFamily: 'Arial, sans-serif', color: '#333', margin: '10px 0' }}>
-            {fileName}
-          </div>
+          <div className="file-name-display">{fileName}</div>
         ) : (
-          <button type="button" onClick={() => document.getElementById('file').click()} className="upload-page-button file-button">
-            파일 선택
+          <button className="upload-button" onClick={() => document.getElementById('file').click()}>
+            Choose files from your computer
           </button>
         )}
         <input type="file" id="file" className="file-input" accept=".wav" onChange={handleFileChange} style={{ display: 'none' }} />
         <div className="upload-page-buttons">
-          <Button label="돌아가기" onClick={onGoBackClick} className="upload-page-button back-button" />
-          <Button label="변환하기" onClick={handleFileUpload} disabled={!file} className="upload-page-button transform-button" />
+          <button className="upload-button" onClick={onGoBackClick}>돌아가기</button>
+          <button className="upload-button" onClick={handleFileUpload} disabled={!file}>변환하기</button>
         </div>
       </div>
-    </Card>
+    </div>
+  </div>
+  </div>
   );
 }
 
@@ -282,60 +312,24 @@ function TransformingPage({ transformedResults, onTransformComplete }) {
     } else {
       console.log("사용 가능한 파일 URL이 없습니다.");
     }
-
-    const timer = setTimeout(onTransformComplete, 1000000); // 10초 후에 변환 완료 처리
-
-    return () => clearTimeout(timer); // 컴포넌트 언마운트 시 타이머 해제
+    const timer = setTimeout(onTransformComplete, 5000); // 5초 후에 변환 완료 처리
+  
+    return () => clearTimeout(timer);
   }, [transformedResults, onTransformComplete]);
-
-  // 12개의 스피너 바를 생성합니다.
-  const spinnerBars = [];
-  for (let i = 1; i <= 12; i++) {
-    spinnerBars.push(
-      <div key={i} className={`bar${i}`}></div>
-    );
-  }
 
   return (
     <div className="transforming-page">
-      <h1>Find to Audio...</h1>
+      <h1>변환 중...</h1>
       <div className="spinner-container">
-        <div className="spinner">
-          {spinnerBars}
-        </div>
+        <div className="spinner"></div>
       </div>
     </div>
   );
 }
 
 // 네 번째 페이지 컴포넌트
-function TransformationCompletePage({ transformedResults, onRestart, audioId }) {
+function TransformationCompletePage({ transformedResults, onRestart }) {
   const audioRefs = useRef([]);
-  const [effects, setEffects] = useState([]);
-  const [selectedEffects, setSelectedEffects] = useState({});
-
-  useEffect(() => {
-    // 효과음 데이터를 가져오는 함수
-    const fetchEffects = async () => {
-      try {
-        const response = await axios.get('/effects/read');
-        if (response.status === 200) {
-          setEffects(response.data.effects);
-        }
-      } catch (error) {
-        console.error('Error fetching effects:', error);
-      }
-    };
-  
-    // 컴포넌트 마운트 시 효과음 데이터를 한 번 가져옵니다.
-    fetchEffects();
-  
-    // 5초마다 효과음 데이터를 다시 가져오는 타이머 설정
-    const interval = setInterval(fetchEffects, 5000);
-  
-    // 컴포넌트 언마운트 시 타이머를 정리합니다.
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     audioRefs.current = audioRefs.current.slice(0, transformedResults.length);
@@ -352,154 +346,58 @@ function TransformationCompletePage({ transformedResults, onRestart, audioId }) 
     }
   };
 
-  const handleEffectSelection = async (resultId, effectSoundId, isChecked) => {
-    const updatedSelectedEffects = { ...selectedEffects };
-    if (isChecked) {
-      updatedSelectedEffects[resultId] = effectSoundId;
-    } else {
-      delete updatedSelectedEffects[resultId];
-    }
-    setSelectedEffects(updatedSelectedEffects);
+  const handleCheckboxChange = async (resultId, isChecked) => {
 
-    const endpoint = isChecked ? `/histories/apply` : `/histories/cancel`;
+    // 우선 테스트용으로 effect_sound_id를 1로 고정
+    const effectSoundId = 1;
+    const endpoint = isChecked ? '/histories/apply' : '/histories/cancel'; 
     try {
       await axios.post(endpoint, {
         result_id: resultId,
-        effect_sound_id: effectSoundId,
-      });
-      console.log(`Effect ${isChecked ? 'applied' : 'cancelled'} successfully`);
-    } catch (error) {
-      console.error(`Error ${isChecked ? 'applying' : 'cancelling'} effect:`, error);
-    }
-  };
-
-  const playAudioWithEffect = async (index, resultId) => {
-    const audio = audioRefs.current[index];
-    const resultEffects = getEffectsForResult(resultId); // 이 결과에 대한 효과음 목록 가져오기
-  
-    // 선택된 효과음이 있는지 확인하고, 있다면 재생 준비
-    const selectedEffect = resultEffects.find(effect => selectedEffects[effect.result_id] === effect.effect_sound_id);
-    if (selectedEffect && audio) {
-      // 효과음 파일 경로로부터 오디오 객체 생성
-      const effectAudio = new Audio(selectedEffect.EffectFilePath);
-  
-      // 효과음 재생하고 종료 후 기본 오디오 재생
-      effectAudio.play();
-      effectAudio.onended = () => {
-        audio.currentTime = 0; // 기본 오디오도 처음부터 재생
-        audio.play();
-      };
-    } else if (audio) {
-      // 효과음 없이 기본 오디오만 재생
-      audio.play();
-    }
-  };
-
-  // 결과에 매핑된 효과음 ID를 가져오는 함수
-  const getEffectsForResult = (resultId) => {
-    // 결과 ID에 따라 효과음을 필터링합니다.
-    return effects.filter(effect => effect.result_id === resultId);
-  };
-
-  const handleCheckboxChange = async (effectSoundId, resultId, isChecked) => {
-    // 체크 박스의 상태에 따라 적절한 엔드포인트 설정 및 서버에 반영
-    const endpoint = isChecked ? '/histories/apply' : '/histories/cancel';
-    
-    try {
-      const response = await axios.post(endpoint, {
-        result_id: resultId,
-        effect_sound_id: effectSoundId,
+        effect_sound_id: effectSoundId, // 여기에 고정된 effect_sound_id를 사용
       }, {
         headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${yourAuthToken}`, // 필요한 경우 인증 토큰 추가
+          'Content-Type': 'application/json'
         }
       });
-      console.log(`효과음이 성공적으로 ${isChecked ? '적용되었습니다.' : '취소되었습니다.'}`, response.data);
-  
-      // 선택된 효과음 상태 업데이트
-      if (isChecked) {
-        selectedEffects[resultId] = effectSoundId;
-      } else {
-        delete selectedEffects[resultId];
-      }
+      console.log(`결과가 성공적으로 ${isChecked ? '적용' : '취소'}되었습니다.`);
     } catch (error) {
-      console.error(`효과음 ${isChecked ? '적용' : '취소'} 중 오류가 발생했습니다:`, error);
-    }
-  };
-
-
-
-  const handleSubmit = async () => {
-    
-    if (!audioId) {
-      console.error('audio_id is not available.');
-      return;
-    }
-
-    try {
-      const userToken = localStorage.getItem('userToken'); // 로컬 스토리지에서 인증 토큰을 가져옵니다.
-
-      // audioId를 사용하여 최종 오디오 파일 생성 요청을 보냅니다.
-      const response = await axios.post(`/effects/finalize/${audioId}`, {}, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`, // 인증 토큰을 헤더에 추가합니다.
-        },
-      });
-
-      if (response.data) {
-        console.log("Audio finalized successfully:", response.data);
-        // 성공적으로 처리된 후의 추가적인 로직 (예: 사용자에게 성공 메시지 표시)
-        onRestart(); // 필요에 따라 초기 상태로 리셋 또는 다른 액션 실행
-      }
-    } catch (error) {
-      console.error("Error finalizing audio:", error);
+      console.error(`결과 ${isChecked ? '적용' : '취소'} 중 오류가 발생했습니다.`, error);
     }
   };
 
   return (
-    <div className="transformation-complete-page" style={{ marginTop: '20px', overflow: 'hidden' }}>
-      <h1>편집 페이지</h1>
-      <div className="audio-players" style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {transformedResults.map((result, index) => {
-          const resultEffects = getEffectsForResult(result.result_id); // 이 결과에 대한 효과음 목록 가져오기
-          return (
-            <div key={result.result_id} className="audio-player" style={{ display: 'flex', flexDirection: 'column', width: '100%', marginBottom: '20px', alignItems: 'center' }}>
-              <p>{result.Converted_Result}</p>
-              <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls></audio>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                {resultEffects.map(effect => (
-                  <div key={effect.effect_sound_id} style={{ display: 'flex', alignItems: 'center', width: 'calc(33.333% - 20px)', margin: '10px' }}>
-                    <audio src={effect.EffectFilePath} controls style={{ marginRight: '10px' }}></audio>
-                    <input
-                      type="checkbox"
-                      onChange={(e) => handleCheckboxChange(effect.effect_sound_id, result.result_id, e.target.checked)}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button onClick={() => playAudioWithEffect(index, result.result_id)}>효과음 재생</button> {/* 재생 버튼 추가 */}
+    <div className="transformation-complete-page">
+      <h1>변환 완료!</h1>
+      <div className="audio-players">
+        {transformedResults.map((result, index) => (
+          <div key={result.result_id} className="audio-player" style={{ marginBottom: '20px' }}>
+            <audio ref={el => audioRefs.current[index] = el} src={result.ResultFilePath} controls>
+              Your browser does not support the audio element.
+            </audio>
+            <div>
+              <button onClick={() => togglePlay(index)}>Play/Pause</button>
+              <input
+                type="checkbox"
+                onChange={e => handleCheckboxChange(result.result_id, e.target.checked)}
+              />
             </div>
-          );
-        })}
+            <p>{result.Converted_Result}</p>
+          </div>
+        ))}
       </div>
-      <Button label="최종 제출" onClick={handleSubmit} />
       <Button label="메인" onClick={onRestart} />
     </div>
   );
 }
 
+
+
 // App 컴포넌트
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [transformedResults, setTransformedResults] = useState([]);
-  const [audioId, setAudioId] = useState(null); // audio_id를 저장할 상태 추가
 
-  useEffect(() => {
-    console.log(`Current audioId: ${audioId}`);
-  }, [audioId]);
-  
   // 로그인 성공 시 호출될 함수
   const handleLoginSuccess = () => {
     setCurrentPage('upload'); // 로그인 성공 시 업로드 페이지로 이동
@@ -539,7 +437,6 @@ function App() {
           onGoBackClick={handleLogout}
           onTransformClick={handleTransformClick}
           setTransformedResults={setTransformedResults}
-          setAudioId={setAudioId} // audioId 상태 업데이트 함수를 props로 전달
         />
       )}
       {currentPage === 'transforming' && (
@@ -554,7 +451,6 @@ function App() {
   transformedResults={transformedResults}
   onRestart={handleRestart}
   onBackToUpload={handleBackToUpload} // 이 함수를 props로 전달
-  audioId={audioId} // audioId 상태를 props로 전달
 />
 )}
     </div>
